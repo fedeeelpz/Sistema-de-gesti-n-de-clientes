@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema de Gestión Backoffice{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'clientes/css/estilos.css' %}">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">Sistema Backoffice</div>
+        <nav>
+            <ul>
+                <li><a href="{% url 'lista_clientes' %}" class="active">👤 Clientes</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</body>
+</html>

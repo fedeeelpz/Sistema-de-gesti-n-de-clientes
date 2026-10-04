@@ -1,0 +1,91 @@
+{% extends 'clientes/base.html' %}
+
+{% block title %}Clientes{% endblock %}
+
+{% block content %}
+    <h1>Sistema de Gestión Backoffice</h1>
+
+    <div class="toolbar">
+        <a href="{% url 'nuevo_cliente' %}" class="btn-primary">+ Nuevo Cliente</a>
+        <form method="get" class="search-box">
+    <input type="text" name="q" id="buscador" placeholder="Buscar cliente..." value="{{ request.GET.q }}">
+</form>
+    </div>
+
+    <table class="tabla-clientes">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Monto</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cliente in clientes %}
+        <tr>
+            <td>{{ cliente.nombre }}</td>
+            <td>${{ cliente.monto }}</td>
+            <td>{{ cliente.fecha|date:"d/m/Y" }}</td>
+            <td>
+                {% if cliente.estado == 'pendiente' %}
+                    <span class="badge badge-pendiente">Pendiente</span>
+                {% else %}
+                    <span class="badge badge-pagado">Pagado</span>
+                {% endif %}
+            </td>
+            <td class="acciones">
+                <button class="btn-icon editar" onclick="abrirModal('{{ cliente.id }}', '{{ cliente.nombre }}', '{{ cliente.monto }}', '{{ cliente.estado }}')">✏️</button>
+
+                <form method="post" action="{% url 'eliminar_cliente' cliente.id %}" style="display:inline;" onsubmit="return confirm('¿Eliminar a {{ cliente.nombre }}?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-icon eliminar">🗑️</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- MODAL DE EDICION -->
+<div class="modal-overlay" id="modalEditar">
+    <div class="modal-box">
+        <h2>Editar cliente</h2>
+        <form id="formEditar" method="post" action="">
+            {% csrf_token %}
+
+            <label for="editNombre">Nombre</label>
+            <input type="text" id="editNombre" name="nombre">
+
+            <label for="editMonto">Monto</label>
+            <input type="number" step="0.01" id="editMonto" name="monto">
+
+            <label for="editEstado">Estado</label>
+            <select id="editEstado" name="estado">
+                <option value="pendiente">Pendiente</option>
+                <option value="pagado">Pagado</option>
+            </select>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                <button type="submit" class="btn-primary">Guardar cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function abrirModal(id, nombre, monto, estado) {
+        document.getElementById('editNombre').value = nombre;
+        document.getElementById('editMonto').value = monto;
+        document.getElementById('editEstado').value = estado;
+        document.getElementById('formEditar').action = '/editar/' + id + '/';
+        document.getElementById('modalEditar').classList.add('activo');
+    }
+
+    function cerrarModal() {
+        document.getElementById('modalEditar').classList.remove('activo');
+    }
+    </script>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'clientes/base.html' %}
+
+{% block title %}Nuevo Cliente{% endblock %}
+
+{% block content %}
+    <h1>Nuevo Cliente</h1>
+
+    <div class="form-card">
+        <form method="post">
+            {% csrf_token %}
+
+            <label for="{{ form.nombre.id_for_label }}">Nombre</label>
+            {{ form.nombre }}
+
+            <label for="{{ form.monto.id_for_label }}">Monto</label>
+            {{ form.monto }}
+
+            <label for="{{ form.estado.id_for_label }}">Estado</label>
+            {{ form.estado }}
+
+            <div class="modal-actions">
+                <a href="{% url 'lista_clientes' %}" class="btn-secondary">Cancelar</a>
+                <button type="submit" class="btn-primary">Guardar cliente</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
