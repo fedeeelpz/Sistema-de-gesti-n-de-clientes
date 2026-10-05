@@ -1,0 +1,98 @@
+{% extends 'clientes/base.html' %}
+
+{% block title %}{{ cliente.nombre }} {{ cliente.apellido }}{% endblock %}
+
+{% block content %}
+    <a href="{% url 'lista_clientes' %}" class="volver">← Volver a Clientes</a>
+    <h1>{{ cliente.nombre }} {{ cliente.apellido }}</h1>
+    <p class="subtitulo">Total pendiente: <strong>${{ cliente.total_pendiente }}</strong></p>
+
+    <div class="form-card">
+        <h2>Agregar nueva deuda</h2>
+        <form method="post">
+            {% csrf_token %}
+            <label for="{{ form.monto.id_for_label }}">Monto</label>
+            {{ form.monto }}
+
+            <label for="{{ form.estado.id_for_label }}">Estado</label>
+            {{ form.estado }}
+
+            <div class="modal-actions">
+                <button type="submit" class="btn-primary">Agregar deuda</button>
+            </div>
+        </form>
+    </div>
+
+    <h2 class="historial-titulo">Historial de deudas</h2>
+
+    <table class="tabla-clientes">
+        <thead>
+            <tr>
+                <th>Monto</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for deuda in deudas %}
+            <tr>
+                <td>${{ deuda.monto }}</td>
+                <td>{{ deuda.fecha|date:"d/m/Y" }}</td>
+                <td>
+                    {% if deuda.estado == 'pendiente' %}
+                        <span class="badge badge-pendiente">Pendiente</span>
+                    {% else %}
+                        <span class="badge badge-pagado">Pagado</span>
+                    {% endif %}
+                </td>
+                <td class="acciones">
+                    <button class="btn-icon editar" onclick="abrirModal('{{ deuda.id }}', '{{ deuda.monto }}', '{{ deuda.estado }}')">✏️</button>
+                    <form method="post" action="{% url 'eliminar_deuda' deuda.id %}" style="display:inline;" onsubmit="return confirm('¿Eliminar esta deuda?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-icon eliminar">🗑️</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">Este cliente todavía no tiene deudas registradas.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- MODAL EDITAR DEUDA -->
+    <div class="modal-overlay" id="modalEditar">
+        <div class="modal-box">
+            <h2>Editar deuda</h2>
+            <form id="formEditar" method="post" action="">
+                {% csrf_token %}
+                <label for="editMonto">Monto</label>
+                <input type="number" step="0.01" id="editMonto" name="monto">
+
+                <label for="editEstado">Estado</label>
+                <select id="editEstado" name="estado">
+                    <option value="pendiente">Pendiente</option>
+                    <option value="pagado">Pagado</option>
+                </select>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function abrirModal(id, monto, estado) {
+            document.getElementById('editMonto').value = monto;
+            document.getElementById('editEstado').value = estado;
+            document.getElementById('formEditar').action = '/deuda/editar/' + id + '/';
+            document.getElementById('modalEditar').classList.add('activo');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalEditar').classList.remove('activo');
+        }
+    </script>
+{% endblock %}
